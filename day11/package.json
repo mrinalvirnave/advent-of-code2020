@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/mrinalvirnave/advent-of-code2020#readme",
   "dependencies": {
-    "async": "^3.2.0"
+    "lodash": "^4.17.20"
   }
 }
