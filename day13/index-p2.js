@@ -24,6 +24,12 @@ rl.on('close', () => {
   var minBusID = Math.min(...busIds);
   var maxBusKey, minBusKey;
 
+  const {
+    Worker, isMainThread, parentPort, workerData
+  } = require('worker_threads');
+
+  if (isMainThread) {
+
   //build an object with the busids
   var busIdObj = {};
 
@@ -38,31 +44,13 @@ rl.on('close', () => {
   // var ts = 100236594864393;
   while (validts == 0) {
     processing1 (busIdObj, maxBusKey, ts, busIds.length);
-    // var isMatch = 0;
-    // var BreakException = {};
-
-    // try {
-    //   Object.keys(busIdObj).forEach(key => {
-    //     if ((ts + (key - maxBusKey)) % busIdObj[key] == 0) {
-    //       isMatch++;
-    //     }
-    //     else {
-    //       throw BreakException;
-    //     }
-    //   });
-    // } catch (e) {
-    //   if (e !== BreakException) throw e;
-    // }
-
-    // if (isMatch == busIds.length) {
-    //   validts = ts - maxBusKey;
-    // }
     ts += maxBusID;
   }
 
   console.log(validts);
 
 });
+}
 
 let processing1 = async function (busIdObj, maxBusKey, ts, matchLen) {
     var isMatch = 0;
