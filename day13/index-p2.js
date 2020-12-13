@@ -1,6 +1,5 @@
-// Day 3 PArt 2
+// Day 13 Part 2
 
-const { doesNotMatch } = require('assert');
 const fs = require('fs');
 const readline = require('readline');
 
@@ -10,40 +9,80 @@ const rl = readline.createInterface({
   terminal: false
 });
 
-var adapterJolts = new Array();
+var notes = new Array();
+var busIds = new Array();
+var validts = 0;
 
 rl.on('line', (line) => {
-  adapterJolts.push(+line);
+  notes.push(line);
 });
 
 rl.on('close', () => {
-  adapterJolts.sort((a, b) => a - b);
-  // Add the socket
-  adapterJolts.unshift(0);
-  // Add the buil-in
-  adapterJolts.push(adapterJolts[adapterJolts.length-1]+3);
+  var busIdsArray = notes[1].split(',');
+  var busIds = busIdsArray.filter(z => z != 'x');
+  var maxBusID = Math.max(...busIds);
+  var minBusID = Math.min(...busIds);
+  var maxBusKey, minBusKey;
 
-  var validPathsFound = validPaths(0);
-  console.log(validPathsFound);
+  //build an object with the busids
+  var busIdObj = {};
+
+  for (var i = 0; i < busIdsArray.length; i++) {
+    if (busIdsArray[i] != 'x') {
+      busIdObj[i] = busIdsArray[i];
+      if (busIdsArray[i] == maxBusID) maxBusKey = i;
+      if (busIdsArray[i] == minBusID) minBusKey = i;
+    }
+  }
+  var ts = maxBusID*Math.round(100000000000000/maxBusID);
+  // var ts = 100236594864393;
+  while (validts == 0) {
+    processing1 (busIdObj, maxBusKey, ts, busIds.length);
+    // var isMatch = 0;
+    // var BreakException = {};
+
+    // try {
+    //   Object.keys(busIdObj).forEach(key => {
+    //     if ((ts + (key - maxBusKey)) % busIdObj[key] == 0) {
+    //       isMatch++;
+    //     }
+    //     else {
+    //       throw BreakException;
+    //     }
+    //   });
+    // } catch (e) {
+    //   if (e !== BreakException) throw e;
+    // }
+
+    // if (isMatch == busIds.length) {
+    //   validts = ts - maxBusKey;
+    // }
+    ts += maxBusID;
+  }
+
+  console.log(validts);
+
 });
 
-let storedPathCounts = {};
+let processing1 = async function (busIdObj, maxBusKey, ts, matchLen) {
+    var isMatch = 0;
+    var BreakException = {};
 
-let validPaths = function (index) {
-
-  if (index == adapterJolts.length-1) return 1;
-  if (storedPathCounts[`${index}`]) return storedPathCounts[`${index}`];
-
-  var compareIndex = index+1;
-  currentValid = 0;
-
-  while (compareIndex < adapterJolts.length && (compareIndex - index) < 4) {
-    if (adapterJolts[compareIndex] - adapterJolts[index] < 4) {
-      currentValid += validPaths(compareIndex);
-      storedPathCounts[`${index}`] = currentValid;
+    try {
+      Object.keys(busIdObj).forEach(key => {
+        if ((ts + (key - maxBusKey)) % busIdObj[key] == 0) {
+          isMatch++;
+        }
+        else {
+          throw BreakException;
+        }
+      });
+    } catch (e) {
+      if (e !== BreakException) throw e;
     }
-    compareIndex++;
-  }
-  if (currentValid > 100000) console.log(`Index: ${index}, Combos: ${currentValid}`);
-  return currentValid;
+
+    if (isMatch == matchLen) {
+      validts = ts - maxBusKey;
+    }
+    return;
 }
