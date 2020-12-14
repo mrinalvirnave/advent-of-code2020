@@ -24,12 +24,6 @@ rl.on('close', () => {
   var minBusID = Math.min(...busIds);
   var maxBusKey, minBusKey;
 
-  const {
-    Worker, isMainThread, parentPort, workerData
-  } = require('worker_threads');
-
-  if (isMainThread) {
-
   //build an object with the busids
   var busIdObj = {};
 
@@ -40,37 +34,25 @@ rl.on('close', () => {
       if (busIdsArray[i] == minBusID) minBusKey = i;
     }
   }
-  var ts = maxBusID*Math.round(100000000000000/maxBusID);
-  // var ts = 100236594864393;
-  while (validts == 0) {
-    processing1 (busIdObj, maxBusKey, ts, busIds.length);
-    ts += maxBusID;
-  }
 
-  console.log(validts);
+  // console.log(JSON.stringify(busIdObj));
 
+  // Find first multiplier that satisfies pairs
+  var timeInc = +busIdObj[0];
+  var timeStart = BigInt(0);
+  Object.keys(busIdObj).forEach(key => {
+    if (key > 0) {
+      timeStart = findFirstMultiple(busIdObj[0], busIdObj[key], timeStart, timeInc, key);
+      timeInc = timeInc * busIdObj[key];
+    }
+  });
+  console.log(timeStart);
 });
-}
 
-let processing1 = async function (busIdObj, maxBusKey, ts, matchLen) {
-    var isMatch = 0;
-    var BreakException = {};
-
-    try {
-      Object.keys(busIdObj).forEach(key => {
-        if ((ts + (key - maxBusKey)) % busIdObj[key] == 0) {
-          isMatch++;
-        }
-        else {
-          throw BreakException;
-        }
-      });
-    } catch (e) {
-      if (e !== BreakException) throw e;
-    }
-
-    if (isMatch == matchLen) {
-      validts = ts - maxBusKey;
-    }
-    return;
+let findFirstMultiple = function(num1, num2, timeStart, timeInc, modulo) {
+  timeSt = BigInt(timeStart);
+  while ((timeSt+BigInt(modulo))%BigInt(num2) != 0) {
+    timeSt += BigInt(timeInc);
+  }
+  return timeSt;
 }
